@@ -71,7 +71,9 @@ func runRepl(ctx context.Context, database *db.DB) {
 			return
 		}
 
-		builder.WriteString(" ")
+		if builder.Len() > 0 {
+			builder.WriteString(" ")
+		}
 		builder.WriteString(line)
 
 		// execute query only when user finishes statement with ';'
@@ -79,7 +81,7 @@ func runRepl(ctx context.Context, database *db.DB) {
 			continue
 		}
 
-		queryStr := strings.TrimSuffix(builder.String(), ";")
+		queryStr := strings.TrimRight(builder.String(), ";")
 
 		builder.Reset()
 
@@ -101,7 +103,7 @@ func runRepl(ctx context.Context, database *db.DB) {
 		duration := time.Since(start)
 
 		if err != nil {
-			fmt.Printf("querying database: query: %s, err: %v", queryStr, err)
+			fmt.Printf("querying database: query: %q, err: %v\n", queryStr, err)
 			continue
 		}
 
