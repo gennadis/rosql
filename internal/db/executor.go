@@ -28,6 +28,13 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 	var results [][]string
 
 	for rows.Next() {
+		// handle slow query and context cancellation
+		select {
+		case <-ctx.Done():
+			return Result{}, ctx.Err()
+		default:
+		}
+
 		values := make([]interface{}, len(cols))
 		ptrs := make([]interface{}, len(cols))
 
