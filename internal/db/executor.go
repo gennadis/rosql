@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+type Executor interface {
+	Query(ctx context.Context, sql string, limit int) (Result, error)
+	Close() error
+}
+
 type Result struct {
 	Columns []string
 	Rows    [][]string
@@ -25,8 +30,7 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 		return Result{}, err
 	}
 
-	var results [][]string
-
+	results := make([][]string, 0)
 	for rows.Next() {
 		// handle slow query and context cancellation
 		select {
@@ -68,10 +72,14 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 	}, nil
 }
 
-func enforceLimit(sql string, limit int) string {
-	lower := strings.ToLower(sql)
-	if strings.Contains(lower, " limit ") {
-		return sql
+func enforceLimit(query string, limit int) string {
+	trimmed := strings.TrimSpace(query)
+	lower := strings.ToLower(trimmed)
+
+	// do nothing if query already has LIMIT clause
+	if strings.HasSuffix(lower, "limit") || strings.Contains(lower, " limit ") {
+		return query
 	}
-	return fmt.Sprintf("%s LIMIT %d", sql, limit)
+
+	return fmt.Sprintf("%s LIMIT %d", trimmed, limit)
 }
