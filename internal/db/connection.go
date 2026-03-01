@@ -17,12 +17,12 @@ type DB struct {
 func New(ctx context.Context, dsn string) (*DB, error) {
 	readOnlyDSN, err := enforceReadOnly(dsn)
 	if err != nil {
-		return nil, fmt.Errorf("failed to inject RO mode into database uri: dsn: %s, %w", dsn, err)
+		return nil, fmt.Errorf("injecting RO mode into database dsn: %s, %w", dsn, err)
 	}
 
 	db, err := sql.Open("pgx", readOnlyDSN)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening database: %w", err)
 	}
 
 	// tune for CLI usage
@@ -32,7 +32,7 @@ func New(ctx context.Context, dsn string) (*DB, error) {
 
 	// validate connection
 	if err := db.PingContext(ctx); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("pinging database: %w", err)
 	}
 
 	return &DB{db: db}, nil

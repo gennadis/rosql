@@ -21,13 +21,13 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 
 	rows, err := d.db.QueryContext(ctx, sqlQuery)
 	if err != nil {
-		return Result{}, err
+		return Result{}, fmt.Errorf("executing %q: %w", sqlQuery, err)
 	}
 	defer rows.Close()
 
 	cols, err := rows.Columns()
 	if err != nil {
-		return Result{}, err
+		return Result{}, fmt.Errorf("reading column names: %w", err)
 	}
 
 	results := make([][]string, 0)
@@ -47,7 +47,7 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 		}
 
 		if err := rows.Scan(ptrs...); err != nil {
-			return Result{}, err
+			return Result{}, fmt.Errorf("scanning rows: %w", err)
 		}
 
 		row := make([]string, len(cols))
@@ -63,7 +63,7 @@ func (d *DB) Query(ctx context.Context, sqlQuery string, limit int) (Result, err
 	}
 
 	if err := rows.Err(); err != nil {
-		return Result{}, err
+		return Result{}, fmt.Errorf("iterating rows: %w", err)
 	}
 
 	return Result{

@@ -23,13 +23,13 @@ const (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		fmt.Printf("failed to read .env file: %v", err)
+		fmt.Printf("reading .env file: %v", err)
 		os.Exit(1)
 	}
 
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		fmt.Println("DATABASE_URL is required")
+		fmt.Println("DATABASE_URL env is required")
 		os.Exit(1)
 	}
 
@@ -38,7 +38,7 @@ func main() {
 
 	database, err := db.New(ctx, dsn)
 	if err != nil {
-		fmt.Printf("database connection error: %v", err)
+		fmt.Printf("connecting database: %v", err)
 		os.Exit(1)
 	}
 	defer database.Close()
@@ -60,7 +60,7 @@ func runRepl(ctx context.Context, database *db.DB) {
 
 		line, err := r.ReadString('\n')
 		if err != nil {
-			fmt.Printf("read error: %v", err)
+			fmt.Printf("reading user input: %v", err)
 			return
 		}
 
@@ -90,7 +90,7 @@ func runRepl(ctx context.Context, database *db.DB) {
 		}
 
 		if err := query.ValidateReadOnly(queryStr); err != nil {
-			fmt.Printf("validating read only query: %v", err)
+			fmt.Printf("validating query is read only: %v", err)
 			continue
 		}
 
@@ -103,7 +103,7 @@ func runRepl(ctx context.Context, database *db.DB) {
 		duration := time.Since(start)
 
 		if err != nil {
-			fmt.Printf("querying database: query: %q, err: %v\n", queryStr, err)
+			fmt.Printf("querying database with %q: %v\n", queryStr, err)
 			continue
 		}
 

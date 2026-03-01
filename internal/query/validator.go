@@ -42,18 +42,18 @@ func ValidateReadOnly(q string) error {
 
 	fields := strings.Fields(lower)
 	if len(fields) == 0 {
-		return fmt.Errorf("empty query")
+		return fmt.Errorf("query is empty")
 	}
 
 	// only SELECT and WITH allowed
 	if fields[0] != "select" && fields[0] != "with" {
-		return fmt.Errorf("only SELECT queries allowed but found: %s", fields[0])
+		return fmt.Errorf("only SELECT queries allowed but found: %q", fields[0])
 	}
 
 	// forbidden keyword detection
 	for _, r := range forbiddenPatterns {
 		if match := r.FindString(lower); match != "" {
-			return fmt.Errorf("forbidden keyword detected: %s", match)
+			return fmt.Errorf("forbidden keyword detected: %q", match)
 		}
 	}
 
